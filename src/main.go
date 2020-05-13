@@ -2,18 +2,31 @@ package main
 
 import (
 	"fmt"
-	"git.qutoutiao.net/newidea/today/src/study"
+	"golang.org/x/cryptov0.0.0-20200210222208-86ce3cb69678/src/leetcode"
 	"math"
 	"net"
 )
 
 func main() {
-	fmt.Println("hello world")
 
+	fmt.Println(leetcode.IsMatchNew("aaa", "bbb"))
+	//PushTask()
+}
 
-	fmt.Println("hello world")
-	study.ChanTest()
+func PushTask()  {
+	defer func() {
+		if err := recover(); err != nil{
+			go PushTask()
+		}
+	}()
+	for {
+		pushHandle()
+	}
+}
 
+func pushHandle() {
+	//fmt.Println("hello world")
+	panic("test")
 }
 
 
