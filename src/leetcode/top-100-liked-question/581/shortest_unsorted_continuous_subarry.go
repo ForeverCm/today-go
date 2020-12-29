@@ -9,6 +9,8 @@ func main() {
 	fmt.Println(findUnsortedSubarray([]int{2, 1, 3, 4}))
 }
 
+
+//todo 未理解
 func findUnsortedSubarray(n []int) int {
 	l := len(n)
 	for i := 1; i < len(n); i++ {
