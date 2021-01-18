@@ -9,11 +9,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"hash/crc32"
 	"log"
 	"runtime"
 )
 
 func main() {
+	fmt.Println(getTableNum("2T20012AC702DBC5"))
 	type TestDes struct {
 		Cuei        string `json:"cuei"` //设备sn编号
 		Uid         string `json:"uid"`  //本地ctei，没有则传空
@@ -24,7 +26,7 @@ func main() {
 	aaa := TestDes{
 		Cuei:        "184085900000022",
 		Uid:         "testtesttest",
-		Timestamp:   1610363331123,
+		Timestamp:   16106306291123,
 		SwitchState: 1,
 	}
 
@@ -59,8 +61,8 @@ var (
 
 const (
 	ivdes = "aproblem"
-	//CUCCKey = "033f6b86b6d722d23e15f5b77913d451" // 联通3des key，需密钥移位
-	CUCCKey = "d616648c09ee5cc3de0cfb3a1b92b99c"  //测试环境联通key
+	CUCCKey = "033f6b86b6d722d23e15f5b77913d451" // 联通3des key，需密钥移位
+	//CUCCKey = "d616648c09ee5cc3de0cfb3a1b92b99c"  //测试环境联通key
 )
 
 //生产环境CUCCKey
@@ -74,7 +76,9 @@ const (
 //map[cuei:184085900000022 switchState:1 timestamp:1.610363331123e+12 uid:testtesttest]
 
 
-
+func getTableNum(sn string) uint32 {
+	return crc32.ChecksumIEEE([]byte(sn)) % 4
+}
 // 联通加密方式，3des
 func LTTripleDesEncrypt(plainStr string) (string, error) {
 	plainText := []byte(plainStr)
