@@ -9,26 +9,46 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"hash/crc32"
 	"log"
 	"runtime"
 )
 
 func main() {
-	fmt.Println(getTableNum("2T20012AC702DBC5"))
+	fmt.Println(getTableNum("8B19429D104C28CB"))
 	type TestDes struct {
 		Cuei        string `json:"cuei"` //设备sn编号
 		Uid         string `json:"uid"`  //本地ctei，没有则传空
-		Timestamp   int    `json:"timestamp"`
+		Timestamp   int64    `json:"timestamp"`
 		SwitchState int    `json:"switchState"`
 	}
 
+	//{"cuei":"184085900000022","timestamp":1611283018917,"uid":"testtesttest","witchState":1}
+
 	aaa := TestDes{
 		Cuei:        "184085900000022",
+		//Cuei: "200010200051271",
 		Uid:         "testtesttest",
-		Timestamp:   16106306291123,
+		Timestamp:   1611566202111,
 		SwitchState: 1,
 	}
+
+	//m := make(map[string]interface{})
+	//m["aaaaa"] = "dddddd"
+	m := getM()
+	data, ok := m["data"].(map[string]interface{})
+	fmt.Println("2222222")
+	spew.Dump(m)
+	spew.Dump(m["data"])
+	spew.Dump(ok)
+	spew.Dump(data)
+	fmt.Println("333333")
+
+	if ok {
+		fmt.Println(data)
+	}
+
 
 	aaaStr, _ := json.Marshal(aaa)
 
@@ -36,13 +56,17 @@ func main() {
 	bbbb, _ := LTTripleDesEncrypt(string(aaaStr))
 
 	fmt.Println(bbbb)
-
-	cccccStr, _ := LTTripleDesDecrypt(bbbb)
-
-	m := make(map[string]interface{})
-	json.Unmarshal([]byte(cccccStr), &m)
+	//
+	//cccccStr, _ := LTTripleDesDecrypt(bbbb)
+	//
+	////m := make(map[string]interface{})
+	////json.Unmarshal([]byte(cccccStr), &m)
 
 	fmt.Println(m)
+}
+
+func getM() map[string]interface{} {
+	return nil
 }
 
 
