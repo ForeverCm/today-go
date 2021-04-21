@@ -10,7 +10,7 @@ import (
 func main() {
 
 	fmt.Println(leetcode.IsMatchNew("aaa", "bbb"))
-	//PushTask()
+	PushTask()
 }
 
 func PushTask()  {
