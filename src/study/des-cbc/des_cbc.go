@@ -16,7 +16,7 @@ import (
 )
 
 func main() {
-	fmt.Println(getTableNum("8B19429D104C28CB"))
+	fmt.Println(getTableNum("8K20094A8BAA0735"))
 	type TestDes struct {
 		Cuei        string `json:"cuei"` //设备sn编号
 		Uid         string `json:"uid"`  //本地ctei，没有则传空
