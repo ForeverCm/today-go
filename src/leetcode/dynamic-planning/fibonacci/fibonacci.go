@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sync"
 	"time"
 )
 
@@ -24,6 +25,7 @@ func fibonacci(n int) int {
 	if n < 2 {
 		return n
 	}
+	sync.Mutex{}
 	return fibonacci(n-1) + fibonacci(n-2)
 }
 

@@ -7,11 +7,29 @@ import (
 	"net"
 )
 
+const (
+	mutexLocked = 1 << iota // mutex is locked
+	mutexWoken
+	mutexWaiterShift = iota
+	mutexWaiterddd = iota
+	ddd = iota
+)
+
 func main() {
+
+	fmt.Println(mutexLocked)
+	fmt.Println(mutexWoken)
+	fmt.Println(mutexWaiterShift)
+	fmt.Println(mutexWaiterddd)
+	fmt.Println(ddd)
+
 
 	fmt.Println(leetcode.IsMatchNew("aaa", "bbb"))
 	PushTask()
 }
+
+
+
 
 func PushTask()  {
 	defer func() {
