@@ -1,4 +1,4 @@
-package leetcode
+package main
 
 import (
 	"fmt"
@@ -7,7 +7,6 @@ import (
 
 func Test_CP_ChapterInfo(t *testing.T) {
 	fmt.Println("test,test")
-	IsMatchNew("11", "222")
+	fmt.Println("222")
 }
-
 
