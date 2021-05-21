@@ -23,6 +23,8 @@ func main() {
 	fmt.Println(mutexWaiterddd)
 	fmt.Println(ddd)
 
+	//aaa := make(map[int]int, 0)
+
 
 	fmt.Println(leetcode.IsMatchNew("aaa", "bbb"))
 	PushTask()

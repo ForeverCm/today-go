@@ -2,31 +2,28 @@ package main
 
 import (
 	"fmt"
-	"testing"
-	"time"
+	"sync"
 )
 
-func Test_CP_ChapterInfo(t *testing.T) {
-	fmt.Println("test,test")
-	fmt.Println("222")
-}
-
-func Test_Select_Timeout(t *testing.T) {
-	c1 := make(chan string, 1)
-	go func() {
-		time.Sleep(time.Second * 1)
-		c1 <- "result 1"
-	}()
-	for {
-		select {
-		case res := <-c1:
-			fmt.Println(res)
-		case <-time.After(time.Second * 2):
-			fmt.Println("timeout 1")
-			return
-		}
+func main() {
+	wg := sync.WaitGroup{}
+	ch := make(chan int, 10)
+	for i := 0; i < 10; i++ {
+		ch <- i // put task into channel
 	}
-	fmt.Println("end............")
 
+	close(ch)
+
+	wg.Add(4)
+	for j := 0; j < 4; j++ {
+		go func() {
+			for {
+				task := <-ch
+				// do sth
+				fmt.Println(task)
+			}
+			wg.Done()
+		}()
+	}
+	wg.Wait()
 }
-
