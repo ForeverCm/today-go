@@ -24,6 +24,28 @@ func main() {
 		Timestamp int64  `json:"timestamp"` //请求时间戳，单位毫秒
 	}
 
+
+
+	type SyncSwitchStatus1 struct {
+		DeviceSn     string `json:"deviceSn"`     //音箱sn
+		TyPhone      string `json:"tyPhone"`      //天翼账号
+		Timestamp    int64  `json:"timestamp"`    //请求时间戳，单位毫秒
+		SwitchType   int    `json:"switchType"`   //1 回家看看，2 一呼即通，3 智能抓拍
+		SwitchStatus int    `json:"switchStatus"` //1 开, 2 关
+		External int `json:external` //
+	}
+
+	type DoorbellStateChangeReqBody struct {
+		DeviceSnList string `json:"deviceSnList"`
+		TpAccount string `json:"tpAccount"`
+		DoorbellId string `json:"doorbellId"`
+		Src string `json:"src"`
+		State int `json:"state"`
+		ReqTime int64 `json:"reqTime"`
+		Kkkkk int `json:"kkkkk"`
+	}
+
+
 	type SyncSwitchStatus struct {
 		DeviceSn     string `json:"deviceSn"`     //音箱sn
 		TyPhone      string `json:"tyPhone"`      //天翼账号
@@ -31,6 +53,8 @@ func main() {
 		SwitchType   int    `json:"switchType"`   //1 回家看看，2 一呼即通，3 智能抓拍
 		SwitchStatus int    `json:"switchStatus"` //1 开, 2 关
 	}
+
+
 
 	getSwitchStatus := GetSwitchStatus{
 		DeviceSn: "C4C00400FF040310008K20149DB5A2BE20",
@@ -45,24 +69,46 @@ func main() {
 	println(getSwitchStatusDecryptStr)
 
 
-	println("------------------")
-	syncSwitchStatus := SyncSwitchStatus{
+	//{"tpAccount":"13305770106","src":"ctcc","deviceSnList":"C4C00400FF040361018T2115A1AA5A758A","state":2,"reqTime":1622618847331,"doorbellId":"3QHLB142154WCFU"}
+
+	println("----------11111111111111111111--------")
+	stateChange := DoorbellStateChangeReqBody{
+		DeviceSnList:"11111111",
+		TpAccount: "2222",
+		DoorbellId: "333",
+		Src : "444",
+		State: 4,
+		ReqTime: 5,
+		Kkkkk: 7,
+	}
+	syncSwitchStatus := SyncSwitchStatus1{
 		DeviceSn: "C4C00400FF040310008K20149DB5A2BE20",
 		//DeviceSn: "CTCC-6H19243D9F169F2E",
 		TyPhone: "13369207073",
 		Timestamp: time.Now().UnixNano() / 1e6,
 		SwitchStatus: 2,
 		SwitchType: 2,
+		External: 1,
 	}
 	syncSwitchStatusBytes, _ := json.Marshal(syncSwitchStatus)
 	syncSwitchStatusStr, _ := AesCTREncrypt(string(syncSwitchStatusBytes), AES_CTR_KEY)
 	println(syncSwitchStatusStr)
 
+	stateChangeBytes, _ := json.Marshal(stateChange)
+	stateChangeStr, _ := AesCTREncrypt(string(stateChangeBytes), AES_CTR_KEY)
+	fmt.Println("99999999999")
+	fmt.Println(stateChangeStr)
+	fmt.Println("99999999999")
+
 	syncSwitchStatusDecryptStr, _ := AesCTRDecrypt(syncSwitchStatusStr, AES_CTR_KEY)
-	println(syncSwitchStatusDecryptStr)
+
+	fmt.Println(syncSwitchStatusDecryptStr)
+	aaaaaa := SyncSwitchStatus{}
+	json.Unmarshal([]byte(syncSwitchStatusDecryptStr), &aaaaaa)
+	fmt.Println(aaaaaa.DeviceSn)
 
 
-	println("------------")
+	println("----------11111111111111111111--------")
 
 	testStr, _ := AesCTRDecrypt("kfotF/SLa6YraSBQnemnrbVJg/hLg+UhoAkUpP9SyepQ0hyNzjOuweUKQwOMFEHz0jPqyiFcTgCPR1JfP0Wti1mra/m3+O/K54895egtJsZxtBsMS2MDvZuUU3ut1/kcH+Hp", AES_CTR_KEY)
 	println(testStr)
@@ -99,7 +145,7 @@ func testFunc(aaa int) {
 
 const (
 	AES_CTR_IV  = "7EtZy2zMlyBB6MNv"
-	AES_CTR_KEY = "3sOzeOzdjhzv6EzmTHrE5w7LGpYT83VQ"
+	AES_CTR_KEY = "r6Je8tDyqBD7zqcv"
 )
 
 func aesCtrCrypt(text []byte, key []byte, iv []byte) ([]byte, error) {
