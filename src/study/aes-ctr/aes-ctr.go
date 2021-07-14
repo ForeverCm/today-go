@@ -3,137 +3,154 @@ package main
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/hmac"
 	"crypto/md5"
+	"crypto/sha1"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math"
+	"hash/crc32"
 	"strconv"
+	"strings"
 	"time"
 )
 
+const (
+	AES_CTR_IV  = "7EtZy2zMlyBB6MNv"
+	AES_CTR_KEY = "3sOzeOzdjhzv6EzmTHrE5w7LGpYT83VQ"
+
+	Secret_AES_CONTACT_CTR_IV  = "7EtZy2zMlyBB6MNv"
+	Secret_AES_CONTACT_CTR_KEY = "3sOzeOzdjhzv6EzmTHrE5w7LGpYT83VQ"
+
+)
+
 func main() {
-	fmt.Println("--------------")
-	fmt.Println(GenSimplePushServerAuthToken("10009", "10000009"))
-	fmt.Println("--------------")
-	type GetSwitchStatus struct {
-		DeviceSn  string `json:"deviceSn"`  //音箱sn
-		TyPhone   string `json:"tyPhone"`   //天翼账号
-		Timestamp int64  `json:"timestamp"` //请求时间戳，单位毫秒
+	type GuHuaNotifyReq struct {
+		Type         int    `json:"type"`
+		TyAccount    string `json:"tyAccount"`
+		CtccDeviceSn string `json:"ctccDeviceSn"`
+		Ctei         string `json:"ctei"`
+		BindKey      string `json:"bindKey"`
+		Telephone    string `json:"telephone"`
+		Timestamp    int64  `jons:"timestamp"`
+	}
+
+	guHuaNotifyReq := GuHuaNotifyReq{
+		Type : 1,
+		TyAccount: "18829026981",
+		CtccDeviceSn: "6H19243D9F169F2E",
+		Ctei : "kdkfsafd",
+		BindKey : "abababab",
+		Telephone : "18277778888",
+		Timestamp : time.Now().Unix(),
 	}
 
 
 
-	type SyncSwitchStatus1 struct {
-		DeviceSn     string `json:"deviceSn"`     //音箱sn
-		TyPhone      string `json:"tyPhone"`      //天翼账号
-		Timestamp    int64  `json:"timestamp"`    //请求时间戳，单位毫秒
-		SwitchType   int    `json:"switchType"`   //1 回家看看，2 一呼即通，3 智能抓拍
-		SwitchStatus int    `json:"switchStatus"` //1 开, 2 关
-		External int `json:external` //
+	type CtccGuhuaContactResDataAddrBook struct {
+		Id     int64  `json:"id"`
+		Name   string `json:"name"`
+		Mobile string `json:"mobile"`
 	}
 
-	type DoorbellStateChangeReqBody struct {
-		DeviceSnList string `json:"deviceSnList"`
-		TpAccount string `json:"tpAccount"`
-		DoorbellId string `json:"doorbellId"`
-		Src string `json:"src"`
-		State int `json:"state"`
-		ReqTime int64 `json:"reqTime"`
-		Kkkkk int `json:"kkkkk"`
+	type CtccGuhuaContactResData struct {
+		TyAccount string                            `json:"tyAccount"`
+		BookList  []CtccGuhuaContactResDataAddrBook `json:"bookList"`
 	}
 
-
-	type SyncSwitchStatus struct {
-		DeviceSn     string `json:"deviceSn"`     //音箱sn
-		TyPhone      string `json:"tyPhone"`      //天翼账号
-		Timestamp    int64  `json:"timestamp"`    //请求时间戳，单位毫秒
-		SwitchType   int    `json:"switchType"`   //1 回家看看，2 一呼即通，3 智能抓拍
-		SwitchStatus int    `json:"switchStatus"` //1 开, 2 关
+	ctccGuhuaContactResDataAddrBook := CtccGuhuaContactResDataAddrBook{
+		Id: 1,
+		Name: "chenmeng",
+		Mobile: "18829026981",
+	}
+	ctccGuhuaContactResDataAddrBook2 := CtccGuhuaContactResDataAddrBook{
+		Id: 2,
+		Name: "xiaoming",
+		Mobile: "18829047896",
 	}
 
-
-
-	getSwitchStatus := GetSwitchStatus{
-		DeviceSn: "C4C00400FF040310008K20149DB5A2BE20",
-		TyPhone: "13369207073",
-		Timestamp: time.Now().UnixNano() / 1e6,
+	ctccGuhuaContactResData := CtccGuhuaContactResData{
+		TyAccount: "18829026981",
+		BookList: []CtccGuhuaContactResDataAddrBook{
+			ctccGuhuaContactResDataAddrBook,
+			ctccGuhuaContactResDataAddrBook2,
+		},
 	}
-	getSwitchStatusBytes, _ := json.Marshal(getSwitchStatus)
-	getSwitchStatusStr, _ := AesCTREncrypt(string(getSwitchStatusBytes), AES_CTR_KEY)
+
+	fmt.Println("-----------999999999999-----------")
+	getSwitchStatusBytesBytes, _ := json.Marshal(ctccGuhuaContactResData)
+	getSwitchStatusStr, _ := AesCTREncrypt(string(getSwitchStatusBytesBytes), AES_CTR_KEY)
 	println(getSwitchStatusStr)
 
-	getSwitchStatusDecryptStr, _ := AesCTRDecrypt(getSwitchStatusStr, AES_CTR_KEY)
-	println(getSwitchStatusDecryptStr)
-
-
-	//{"tpAccount":"13305770106","src":"ctcc","deviceSnList":"C4C00400FF040361018T2115A1AA5A758A","state":2,"reqTime":1622618847331,"doorbellId":"3QHLB142154WCFU"}
-
-	println("----------11111111111111111111--------")
-	stateChange := DoorbellStateChangeReqBody{
-		DeviceSnList:"11111111",
-		TpAccount: "2222",
-		DoorbellId: "333",
-		Src : "444",
-		State: 4,
-		ReqTime: 5,
-		Kkkkk: 7,
+	type QueryCtccGuHuaContactPerson struct {
+		ContactId   int64  `json:"contactId"`
+		Nickname    string `json:"nickname"`
+		PhoneNumber string `json:"phoneNumber"`
 	}
-	syncSwitchStatus := SyncSwitchStatus1{
-		DeviceSn: "C4C00400FF040310008K20149DB5A2BE20",
-		//DeviceSn: "CTCC-6H19243D9F169F2E",
-		TyPhone: "13369207073",
-		Timestamp: time.Now().UnixNano() / 1e6,
-		SwitchStatus: 2,
-		SwitchType: 2,
-		External: 1,
+	type GetCtccGuHuaContactRes struct {
+		Persons []*QueryCtccGuHuaContactPerson `json:"persons"`
+		Version int64                          `json:"version"`
+		Type    string                         `json:"type"`
 	}
-	syncSwitchStatusBytes, _ := json.Marshal(syncSwitchStatus)
-	syncSwitchStatusStr, _ := AesCTREncrypt(string(syncSwitchStatusBytes), AES_CTR_KEY)
-	println(syncSwitchStatusStr)
+	queryCtccGuHuaContactPerson := QueryCtccGuHuaContactPerson{
+		ContactId: 1,
+		Nickname: "chenmeng",
+		PhoneNumber: "18829026981",
+	}
+	queryCtccGuHuaContactPerson1 := QueryCtccGuHuaContactPerson{
+		ContactId: 2,
+		Nickname: "xiaoming",
+		PhoneNumber: "18829047896",
+	}
 
-	stateChangeBytes, _ := json.Marshal(stateChange)
-	stateChangeStr, _ := AesCTREncrypt(string(stateChangeBytes), AES_CTR_KEY)
-	fmt.Println("99999999999")
-	fmt.Println(stateChangeStr)
-	fmt.Println("99999999999")
+	getCtccGuHuaContactRes := []*QueryCtccGuHuaContactPerson{
+		&queryCtccGuHuaContactPerson,
+		&queryCtccGuHuaContactPerson1,
+	}
 
-	syncSwitchStatusDecryptStr, _ := AesCTRDecrypt(syncSwitchStatusStr, AES_CTR_KEY)
-
-	fmt.Println(syncSwitchStatusDecryptStr)
-	aaaaaa := SyncSwitchStatus{}
-	json.Unmarshal([]byte(syncSwitchStatusDecryptStr), &aaaaaa)
-	fmt.Println(aaaaaa.DeviceSn)
-
-
-	println("----------11111111111111111111--------")
-
-	testStr, _ := AesCTRDecrypt("kfotF/SLa6YraSBQnemnrbVJg/hLg+UhoAkUpP9SyepQ0hyNzjOuweUKQwOMFEHz0jPqyiFcTgCPR1JfP0Wti1mra/m3+O/K54895egtJsZxtBsMS2MDvZuUU3ut1/kcH+Hp", AES_CTR_KEY)
-	println(testStr)
-
-	testStr1, _ := AesCTRDecrypt("kfotF/SLa6YraSBQnemnrbVJg/hLg+UhoAkUpP9SyepQ0hyNzjOuweUKQwOMFEHz0jPqyiFcTgCPR1JfP0Wti1mra/m3+O/K54895egtJsZxtBsMS2MDvZuUU3Ov0f0THe+4gq0K15lpRCa7j2z8IHVBFPZzdFPdvsufGJp3vtS/kN8=", AES_CTR_KEY)
-	println(testStr1)
-	println("---fdafda---------")
-
-	testStr2, _ := AesCTRDecrypt("kfogAcSNeqERY2YP0Yip3Klb2KoIoNFn8Ut04a4WjKE52h2Q2G6Y7KACHxK9RwWkjTOkgl0WUgOLFxw+bwbqyBL8efS2sg==", AES_CTR_KEY)
-	println(testStr2)
-
-	println("------------")
+	fmt.Println("-----------kkkkkkkkkkkkkkkkkkkkkkkkkk-----------")
+	getCtccGuHuaContactResByte, _ := json.Marshal(getCtccGuHuaContactRes)
+	getCtccGuHuaContactResStr, _ := AesCTREncrypt(string(getCtccGuHuaContactResByte), AES_CTR_KEY)
+	println(getCtccGuHuaContactResStr)
 
 
-	value, _ := strconv.Atoi("3244206695")
-	println(value)
 
-	testFunc(value)
 
-	fmt.Println("各int类型的取值范围为：")
-	fmt.Println("int8:", math.MinInt8, "~", math.MaxInt8)
-	fmt.Println("int16:", math.MinInt16, "~", math.MaxInt16)
-	fmt.Println("int32:", math.MinInt32, "~", math.MaxInt32)
-	fmt.Println("int64:", math.MinInt64, "~", math.MaxInt64)
-	fmt.Println()
+
+
+
+
+
+
+
+
+
+
+
+	fmt.Println("-----------111111------------")
+	getSwitchStatusBytes, _ := json.Marshal(guHuaNotifyReq)
+	getSwitchStatusStr, _ = AesCTREncrypt(string(getSwitchStatusBytes), AES_CTR_KEY)
+	println(getSwitchStatusStr)
+
+	fmt.Println("-----------2222222------------")
+
+	getSwitchStatusDecryptStr, _ := AesCTRDecrypt("kfo9C8OBa6wNaXZIhYii3bZIhfBP85EkoRsLt60NlrlXiV/I2DCx+PIiFWPzE13zk3782h1RA1TIVFtOP0SmiVarbfml4/6GqsAsrr9qsiagoRMMDH5OrsTFSXCsz+9JQrT9zLtfhM87H0HzzTHqLHVeBqcoP0nfu/3JQ8zlQ3392oAPPxE=", AES_CTR_KEY)
+	fmt.Println(getSwitchStatusDecryptStr)
+
+
+	fmt.Println("0000000000000000000000000000")
+	fmt.Println(getTableNum("6H19243D9F169F2E"))
+
+	fmt.Println(makeGuhuaPlatformSignature("2021-07-13 16:53:48", "/rtc/third/contact/query"))
+
+
+	fmt.Println(time.Now().Format("2006-01-02 15:04:05"))
+
+
+	fmt.Println("1111111111")
+	fmt.Println(AesCTRDecryptWithIv("kfo5F/CRZ60LJTgxxIjwgesN1qsPjMczrggLt6ELmrl1gUHZ2DDI4LguHyysSBbz0jPu2x5aRCCfCAoYfFSkn1GhY/y+/+7e8pV4rvhkLpBztgVaEDFBxcmDUXi0waNNTr36wbMYnNcoVBujkGS3dCBPGqd0dUjQs9aeFIxnv9S/gJNKWl5FJy4qXpOHgpQTIYSx4h9dByrIH2wdAeoZ9nMs+s04nJYVgmQGL3J/IG0=", Secret_AES_CONTACT_CTR_KEY, Secret_AES_CONTACT_CTR_IV))
 
 }
 
@@ -143,10 +160,7 @@ func testFunc(aaa int) {
 
 
 
-const (
-	AES_CTR_IV  = "7EtZy2zMlyBB6MNv"
-	AES_CTR_KEY = "r6Je8tDyqBD7zqcv"
-)
+
 
 func aesCtrCrypt(text []byte, key []byte, iv []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
@@ -193,9 +207,37 @@ func GenSimplePushServerAuthToken(name string, secret string) string {
 	return token
 }
 
+func AesCTRDecryptWithIv(cipherText string, key string, ivStr string) (string, error) {
+
+	plainText, err := base64.StdEncoding.DecodeString(cipherText)
+	if err != nil {
+		return "", err
+	}
+	plainText, err = aesCtrCrypt([]byte(plainText), []byte(key), []byte(ivStr))
+	if err != nil {
+		return "", err
+	}
+	return string(plainText), nil
+}
+
 func GetMD5Hash(text string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(text))
 	return hex.EncodeToString(hasher.Sum(nil))
 }
+
+
+func getTableNum(sn string) uint32 {
+	return crc32.ChecksumIEEE([]byte(sn)) % 4
+}
+
+
+func makeGuhuaPlatformSignature(reqDate, requestURI string) string {
+	param := fmt.Sprintf("AppId=%s&ReqDate=%s&RequestURI=%s&Param=%s", "88010012", reqDate, requestURI, "")
+	key := []byte("ZJl3AZ67spXiaKpVd6SVxxNnYdlZpYeG")
+	mac := hmac.New(sha1.New, key)
+	mac.Write([]byte(param))
+	return strings.ToTitle(hex.EncodeToString(mac.Sum(nil)))
+}
+
 
